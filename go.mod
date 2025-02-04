@@ -1,8 +1,8 @@
 module github.com/ncecere/reader-go
 
-go 1.23
+go 1.21
 
-toolchain go1.23.5
+toolchain go1.21.3
 
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.6.0

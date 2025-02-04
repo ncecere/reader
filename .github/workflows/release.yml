@@ -75,7 +75,7 @@ jobs:
           cd build && tar czf reader-darwin-arm64.tar.gz reader && cd ..
 
           # Build for Windows (amd64)
-          GOOS=windows GOARCH=amd64 make build
+          GOOS=windows GOARCH=amd64 go build -ldflags="-w -s -X main.version=${GITHUB_SHA::7} -X main.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" -tags 'netgo osusergo static_build' -o build/reader.exe cmd/reader/main.go
           cd build && zip reader-windows-amd64.zip reader.exe && cd ..
 
       - name: Upload platform-specific builds
