@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "4444:4444"
+      - "444:4444"
     volumes:
       - ./config.yml:/app/config/config.yml
     environment:

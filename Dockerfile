@@ -50,6 +50,8 @@ RUN mkdir -p /app/config && \
 ENV PATH="/app:${PATH}"
 ENV CHROME_PATH="/usr/bin/chromium"
 ENV DISPLAY=":99"
+# Chrome flags for containerized environment
+ENV CHROMIUM_FLAGS="--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--headless,--disable-software-rasterizer,--disable-setuid-sandbox,--no-zygote,--single-process,--disable-extensions"
 
 # Expose port
 EXPOSE 4444

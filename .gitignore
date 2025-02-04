@@ -57,5 +57,10 @@ tmp/
 /config*.yml
 !/config.example.yml
 
+# Docker compose files (except example)
+compose.yml
+docker-compose.yml
+!/docker-compose.example.yml
+
 # Debug files
 __debug_bin
