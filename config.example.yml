@@ -1,142 +1,96 @@
-# Reader Service Configuration Example
-# This file contains all available configuration options with detailed explanations
-
+# Server configuration
 server:
-  # Port to listen on (default: 4444)
+  # Port to run the server on
+  # ENV: READER_PORT
+  # Flag: --port
   port: 4444
-  # Host to bind to (default: "0.0.0.0")
-  host: "0.0.0.0"
-  # Read timeout in seconds (default: 30)
-  read_timeout: 30
-  # Write timeout in seconds (default: 30)
-  write_timeout: 30
-  # Idle timeout in seconds (default: 60)
-  idle_timeout: 60
-  # Maximum request body size in MB (default: 10)
-  max_body_size: 10
-  # Enable CORS (default: false)
-  cors_enabled: false
-  # CORS allowed origins (default: ["*"])
-  cors_origins: ["*"]
-  # Enable compression (default: true)
-  compression: true
 
+# Browser configuration
 browser:
-  # Number of Chrome instances in the pool (default: 3)
-  pool_size: 3
-  # Path to Chrome executable (optional)
+  # Number of browser instances in the pool
+  # ENV: READER_POOL_SIZE
+  # Flag: --pool-size
+  pool_size: 5
+
+  # Path to Chrome/Chromium executable
+  # ENV: READER_CHROME_PATH
+  # Flag: --chrome-path
   chrome_path: ""
-  # Request timeout in seconds (default: 30)
+
+  # Request timeout in seconds
+  # ENV: READER_BROWSER_TIMEOUT
+  # Flag: --browser-timeout
   timeout: 30
-  # Maximum memory per instance in MB (default: 128)
-  max_memory_mb: 128
-  # Number of retries for failed requests (default: 3)
-  retries: 3
-  # Delay between retries in seconds (default: 1)
-  retry_delay: 1
-  # Custom user agent string (optional)
-  user_agent: "Mozilla/5.0 (X11; Linux x86_64) Chrome/90.0.4430.212"
-  # Window size for screenshots (default: 1920x1080)
-  window_width: 1920
-  window_height: 1080
-  # Additional Chrome flags (optional)
-  chrome_flags:
-    - "--disable-gpu"
-    - "--no-sandbox"
-    - "--disable-dev-shm-usage"
-  # Enable browser instance pre-warming (default: true)
-  prewarming: true
-  # Maximum concurrent requests per instance (default: 5)
-  max_concurrent_requests: 5
 
-cache:
-  # Enable caching (default: true)
+  # Maximum retries for browser operations
+  # ENV: READER_MAX_RETRIES
+  # Flag: --max-retries
+  max_retries: 3
+
+# AI configuration
+ai:
+  # Enable/disable AI features
+  # ENV: READER_AI_ENABLED
+  # Flag: --ai-enabled
   enabled: true
-  # Cache TTL in seconds (default: 3600)
-  ttl: 3600
-  # Maximum cache size in MB (default: 256)
-  max_size_mb: 256
-  # Cache cleanup interval in seconds (default: 300)
-  cleanup_interval: 300
-  # Enable stale-while-revalidate (default: true)
-  stale_revalidate: true
-  # Stale TTL in seconds (default: 86400)
-  stale_ttl: 86400
-  # Cache compression level (0-9, default: 6)
-  compression_level: 6
 
+  # AI API endpoint
+  # ENV: READER_AI_ENDPOINT
+  # Flag: --ai-endpoint
+  api_endpoint: "https://ai.bitop.dev/v1"
+
+  # API key for authentication
+  # ENV: READER_AI_KEY
+  # Flag: --ai-key
+  api_key: "your-api-key-here"
+
+  # Model to use for summarization
+  # ENV: READER_AI_MODEL
+  # Flag: --ai-model
+  model: "vltr-mistral-small"
+
+  # Custom prompt for summarization
+  # ENV: READER_AI_PROMPT
+  prompt: |
+    As a summarization assistant, analyze the text and create a clear, concise summary.
+    Focus on:
+    (1) main ideas and key points
+    (2) factual accuracy
+    (3) important context
+    (4) removing redundancy
+    (5) using clear language.
+    Keep it brief and accessible while maintaining technical accuracy when present.
+
+# Logging configuration
 logging:
-  # Log level (debug, info, warn, error) (default: info)
+  # Log level (debug, info, warn, error)
+  # ENV: READER_LOG_LEVEL
   level: "info"
-  # Log format (json, text) (default: json)
-  format: "json"
-  # Log output (stdout, file) (default: stdout)
-  output: "stdout"
-  # Log file path (required if output is "file")
-  file_path: "/var/log/reader.log"
-  # Enable request logging (default: true)
-  request_logging: true
-  # Enable stack traces (default: true)
-  stack_traces: true
-  # Fields to mask in logs (optional)
-  mask_fields:
-    - "authorization"
-    - "cookie"
 
+  # Use JSON format for logs
+  # ENV: READER_LOG_JSON
+  json: true
+
+  # Include caller information in logs
+  # ENV: READER_LOG_CALLER
+  caller: true
+
+# Cache configuration
+cache:
+  # Maximum age of cached items in seconds
+  # ENV: READER_CACHE_MAX_AGE
+  max_age: 3600
+
+  # Maximum number of items to keep in cache
+  # ENV: READER_CACHE_MAX_ITEMS
+  max_items: 1000
+
+# Metrics configuration
 metrics:
-  # Enable Prometheus metrics (default: true)
+  # Enable/disable Prometheus metrics
+  # ENV: READER_METRICS_ENABLED
   enabled: true
-  # Metrics endpoint path (default: "/metrics")
+
+  # Path for metrics endpoint
+  # ENV: READER_METRICS_PATH
   path: "/metrics"
-  # Collection interval in seconds (default: 15)
-  collection_interval: 15
-  # Enable detailed metrics (default: true)
-  detailed: true
-  # Labels to include (optional)
-  labels:
-    environment: "production"
-    region: "us-east-1"
-  # Histogram buckets for latency metrics (optional)
-  latency_buckets: [0.1, 0.25, 0.5, 1, 2.5, 5, 10]
-
-screenshots:
-  # Screenshot output directory (default: "screenshots")
-  output_dir: "screenshots"
-  # Image quality (1-100, default: 90)
-  quality: 90
-  # Image format (png, jpeg, default: png)
-  format: "png"
-  # Enable full-page screenshots (default: true)
-  full_page: true
-  # Maximum screenshot dimension (default: 16384)
-  max_dimension: 16384
-  # Screenshot timeout in seconds (default: 30)
-  timeout: 30
-
-security:
-  # Enable rate limiting (default: true)
-  rate_limit: true
-  # Requests per minute per IP (default: 60)
-  rate_limit_rpm: 60
-  # Enable request validation (default: true)
-  request_validation: true
-  # Allowed domains (optional)
-  allowed_domains: []
-  # Blocked domains (optional)
-  blocked_domains: []
-  # Maximum URL length (default: 2048)
-  max_url_length: 2048
-
-performance:
-  # Enable parallel processing (default: true)
-  parallel_processing: true
-  # Maximum parallel requests (default: 10)
-  max_parallel_requests: 10
-  # Enable response compression (default: true)
-  response_compression: true
-  # Compression level (1-9, default: 6)
-  compression_level: 6
-  # Enable response caching (default: true)
-  response_caching: true
-  # Cache size in MB (default: 128)
-  response_cache_size: 128
