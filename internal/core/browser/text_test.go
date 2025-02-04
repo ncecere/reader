@@ -13,7 +13,7 @@ func TestTextExtractor_ExtractText(t *testing.T) {
 	// Create a test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(`
+		_, _ = w.Write([]byte(`
 			<!DOCTYPE html>
 			<html>
 			<head><title>Test Page</title></head>

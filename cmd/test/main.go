@@ -40,7 +40,7 @@ func main() {
 
 	// Second request (cached)
 	start = time.Now()
-	content, err = service.GetText(ctx, url)
+	_, err = service.GetText(ctx, url)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to get text: %v", err))
 	}
