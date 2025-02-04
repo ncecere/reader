@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/chromedp/chromedp"
 	"github.com/ncecere/reader-go/internal/common/logger"
@@ -52,9 +53,17 @@ func (s *ScreenshotCapture) CaptureScreenshot(ctx context.Context, url string, o
 			return fmt.Errorf("failed to navigate: %w", err)
 		}
 
-		// Wait for page to load
-		if err := chromedp.Run(ctx, chromedp.WaitReady("body", chromedp.ByQuery)); err != nil {
+		// Wait for page to load with enhanced conditions
+		if err := chromedp.Run(ctx, chromedp.Tasks{
+			chromedp.WaitReady("body", chromedp.ByQuery),
+			chromedp.Sleep(1 * time.Second), // Give time for dynamic content to load
+		}); err != nil {
 			return fmt.Errorf("failed to wait for page load: %w", err)
+		}
+
+		// Set viewport size for consistent screenshots
+		if err := chromedp.Run(ctx, chromedp.EmulateViewport(1280, 800)); err != nil {
+			return fmt.Errorf("failed to set viewport: %w", err)
 		}
 
 		// Capture screenshot

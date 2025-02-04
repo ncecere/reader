@@ -1,6 +1,7 @@
 package converter
 
 import (
+	"fmt"
 	"regexp"
 	"time"
 
@@ -43,4 +44,16 @@ func HTMLToMarkdown(html string) (string, error) {
 // getCurrentTime returns the current time in a readable format
 func getCurrentTime() string {
 	return time.Now().Format("01-02-2006 15:04")
+}
+
+// TextToMarkdown converts plain text to a formatted Markdown document
+func TextToMarkdown(text string) (string, error) {
+	// Add metadata
+	metadata := fmt.Sprintf("Summary Generated: %s\n\n", getCurrentTime())
+
+	// Format the text as a markdown document
+	// We'll keep the text as-is but add proper spacing and formatting
+	content := metadata + text
+
+	return content, nil
 }

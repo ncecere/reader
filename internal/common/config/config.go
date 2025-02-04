@@ -14,17 +14,25 @@ type Config struct {
 		Timeout int `yaml:"timeout"`
 	} `yaml:"server"`
 
+	AI struct {
+		Enabled     bool   `yaml:"enabled"`
+		APIEndpoint string `yaml:"api_endpoint"`
+		APIKey      string `yaml:"api_key"`
+		Model       string `yaml:"model"`
+		Prompt      string `yaml:"prompt"`
+	} `yaml:"ai"`
+
 	Browser struct {
-		PoolSize   int    `yaml:"poolSize"`
-		ChromePath string `yaml:"chromePath"`
+		PoolSize   int    `yaml:"pool_size"`
+		ChromePath string `yaml:"chrome_path"`
 		Timeout    int    `yaml:"timeout"`
-		MaxRetries int    `yaml:"maxRetries"`
+		MaxRetries int    `yaml:"max_retries"`
 	} `yaml:"browser"`
 
 	Screenshots struct {
-		StoragePath string `yaml:"storagePath"`
+		StoragePath string `yaml:"storage_path"`
 		Quality     int    `yaml:"quality"`
-		DefaultType string `yaml:"defaultType"`
+		DefaultType string `yaml:"default_type"`
 	} `yaml:"screenshots"`
 
 	Logging struct {
@@ -67,6 +75,17 @@ func Load() (*Config, error) {
 	}
 	if config.Screenshots.DefaultType == "" {
 		config.Screenshots.DefaultType = "viewport"
+	}
+
+	// Set AI defaults
+	if config.AI.APIEndpoint == "" {
+		config.AI.APIEndpoint = "https://api.openai.com/v1"
+	}
+	if config.AI.Model == "" {
+		config.AI.Model = "gpt-3.5-turbo"
+	}
+	if config.AI.Prompt == "" {
+		config.AI.Prompt = "Please summarize the following text:"
 	}
 
 	return &config, nil

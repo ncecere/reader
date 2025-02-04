@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/ncecere/reader-go/internal/api/handlers"
 	"github.com/ncecere/reader-go/internal/api/middleware"
+	"github.com/ncecere/reader-go/internal/core/ai"
 	"github.com/ncecere/reader-go/internal/core/browser"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/valyala/fasthttp/fasthttpadaptor"
@@ -25,7 +26,7 @@ type Config struct {
 }
 
 // New creates a new server instance
-func New(config *Config, browserService *browser.Service) *Server {
+func New(config *Config, browserService *browser.Service, aiService *ai.Service) *Server {
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 	})
@@ -37,9 +38,11 @@ func New(config *Config, browserService *browser.Service) *Server {
 
 	// Create handlers
 	readerHandler := handlers.NewReaderHandler(browserService)
+	summaryHandler := handlers.NewSummaryHandler(browserService, aiService)
 
 	// Setup routes
 	app.Get("/metrics", MetricsHandler())
+	app.Get("/summary/*", summaryHandler.HandleRequest)
 	app.Get("/*", readerHandler.HandleRequest)
 
 	return &Server{

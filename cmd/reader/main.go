@@ -7,6 +7,7 @@ import (
 
 	"github.com/ncecere/reader-go/internal/common/config"
 	"github.com/ncecere/reader-go/internal/common/logger"
+	"github.com/ncecere/reader-go/internal/core/ai"
 	"github.com/ncecere/reader-go/internal/core/browser"
 	"github.com/ncecere/reader-go/internal/server"
 	"go.uber.org/zap"
@@ -34,10 +35,13 @@ func main() {
 		logger.Log.Fatal("Failed to create browser service", zap.Error(err))
 	}
 
+	// Create AI service
+	aiService := ai.NewService(cfg)
+
 	// Create and start server
 	srv := server.New(&server.Config{
 		Port: cfg.Server.Port,
-	}, browserService)
+	}, browserService, aiService)
 
 	// Handle shutdown gracefully
 	go func() {
@@ -55,7 +59,8 @@ func main() {
 	logger.Log.Info("Starting server",
 		zap.Int("port", cfg.Server.Port),
 		zap.Int("pool_size", cfg.Browser.PoolSize),
-		zap.String("chrome_path", cfg.Browser.ChromePath))
+		zap.String("chrome_path", cfg.Browser.ChromePath),
+		zap.Bool("ai_enabled", cfg.AI.Enabled))
 
 	if err := srv.Start(); err != nil {
 		logger.Log.Fatal("Server error", zap.Error(err))

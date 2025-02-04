@@ -140,3 +140,15 @@ performance:
   response_caching: true
   # Cache size in MB (default: 128)
   response_cache_size: 128
+
+ai:
+  # Enable AI features (default: false)
+  enabled: false
+  # AI API endpoint (default: "https://api.openai.com/v1")
+  api_endpoint: "https://api.openai.com/v1"
+  # AI API key (required if enabled)
+  api_key: ""
+  # AI model to use (default: "gpt-3.5-turbo")
+  model: "gpt-3.5-turbo"
+  # System prompt for summarization (default: "Please summarize the following text:")
+  prompt: "Please provide a concise summary of the following text, highlighting the key points:"
