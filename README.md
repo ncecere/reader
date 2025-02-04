@@ -39,7 +39,80 @@ A high-performance web page content extraction service with support for text ext
 - Docker (for containerized deployment)
 - Make
 
-## Quick Start
+## Installation
+
+### Using Pre-built Binary
+
+Download and install the latest version:
+
+```bash
+# Linux (amd64)
+curl -L https://github.com/ncecere/reader/releases/latest/download/reader-linux-amd64.tar.gz | tar xz
+sudo mv reader /usr/local/bin/
+
+# macOS (amd64)
+curl -L https://github.com/ncecere/reader/releases/latest/download/reader-darwin-amd64.tar.gz | tar xz
+sudo mv reader /usr/local/bin/
+
+# macOS (arm64/M1)
+curl -L https://github.com/ncecere/reader/releases/latest/download/reader-darwin-arm64.tar.gz | tar xz
+sudo mv reader /usr/local/bin/
+
+# Windows (using PowerShell)
+Invoke-WebRequest -Uri https://github.com/ncecere/reader/releases/latest/download/reader-windows-amd64.zip -OutFile reader.zip
+Expand-Archive reader.zip -DestinationPath .
+```
+
+### Using Docker
+
+Pull and run the latest version:
+
+```bash
+# Pull the image
+docker pull ghcr.io/ncecere/reader:latest
+
+# Run with basic configuration
+docker run -p 4444:4444 ghcr.io/ncecere/reader:latest
+
+# Run with custom configuration
+docker run -p 4444:4444 \
+  -v $(pwd)/config.yml:/home/appuser/config.yml \
+  -v $(pwd)/screenshots:/home/appuser/screenshots \
+  ghcr.io/ncecere/reader:latest
+```
+
+### Using Docker Compose
+
+1. Create a docker-compose.yml file (or use the provided one):
+```yaml
+version: '3.8'
+services:
+  reader:
+    image: ghcr.io/ncecere/reader:latest
+    ports:
+      - "4444:4444"
+    volumes:
+      - ./screenshots:/home/appuser/screenshots
+      - chrome-cache:/tmp/chrome
+    environment:
+      - GOMAXPROCS=4
+      - GOGC=100
+      - GOMEMLIMIT=128MiB
+    restart: unless-stopped
+
+volumes:
+  chrome-cache:
+```
+
+2. Start the service:
+```bash
+docker-compose up -d
+```
+
+3. Optional: Start with monitoring (Prometheus + Grafana):
+```bash
+docker-compose up -d reader prometheus grafana
+```
 
 ### Local Development
 
