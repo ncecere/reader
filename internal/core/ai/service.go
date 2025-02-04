@@ -68,7 +68,6 @@ func (s *Service) Summarize(ctx context.Context, text string) (string, error) {
 	}
 
 	endpoint := fmt.Sprintf("%s/chat/completions", s.config.AI.APIEndpoint)
-	fmt.Printf("Debug - API Key: %s\n", s.config.AI.APIKey) // Debug log
 	req, err := http.NewRequestWithContext(ctx, "POST", endpoint, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %v", err)
@@ -76,9 +75,6 @@ func (s *Service) Summarize(ctx context.Context, text string) (string, error) {
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.config.AI.APIKey))
-
-	// Log request details for debugging
-	fmt.Printf("Making request to: %s\nHeaders: %+v\nBody: %s\n", endpoint, req.Header, jsonData)
 
 	resp, err := s.client.Do(req)
 	if err != nil {
