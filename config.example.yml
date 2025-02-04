@@ -1,154 +1,62 @@
-# Reader Service Configuration Example
-# This file contains all available configuration options with detailed explanations
-
+# Server configuration
 server:
-  # Port to listen on (default: 4444)
+  # Port to run the server on
   port: 4444
-  # Host to bind to (default: "0.0.0.0")
-  host: "0.0.0.0"
-  # Read timeout in seconds (default: 30)
-  read_timeout: 30
-  # Write timeout in seconds (default: 30)
-  write_timeout: 30
-  # Idle timeout in seconds (default: 60)
-  idle_timeout: 60
-  # Maximum request body size in MB (default: 10)
-  max_body_size: 10
-  # Enable CORS (default: false)
-  cors_enabled: false
-  # CORS allowed origins (default: ["*"])
-  cors_origins: ["*"]
-  # Enable compression (default: true)
-  compression: true
-
-browser:
-  # Number of Chrome instances in the pool (default: 3)
+  # Number of browser instances in the pool
   pool_size: 3
-  # Path to Chrome executable (optional)
+
+# Browser configuration
+browser:
+  # Optional: Path to Chrome/Chromium executable
+  # Leave empty to use system default
   chrome_path: ""
-  # Request timeout in seconds (default: 30)
+
+  # Request timeout in seconds
   timeout: 30
-  # Maximum memory per instance in MB (default: 128)
-  max_memory_mb: 128
-  # Number of retries for failed requests (default: 3)
-  retries: 3
-  # Delay between retries in seconds (default: 1)
-  retry_delay: 1
-  # Custom user agent string (optional)
+
+  # Maximum memory per browser instance in MB
+  max_memory: 128
+
+  # Custom user agent (optional)
   user_agent: "Mozilla/5.0 (X11; Linux x86_64) Chrome/90.0.4430.212"
-  # Window size for screenshots (default: 1920x1080)
-  window_width: 1920
-  window_height: 1080
-  # Additional Chrome flags (optional)
-  chrome_flags:
-    - "--disable-gpu"
-    - "--no-sandbox"
-    - "--disable-dev-shm-usage"
-  # Enable browser instance pre-warming (default: true)
-  prewarming: true
-  # Maximum concurrent requests per instance (default: 5)
-  max_concurrent_requests: 5
 
-cache:
-  # Enable caching (default: true)
-  enabled: true
-  # Cache TTL in seconds (default: 3600)
-  ttl: 3600
-  # Maximum cache size in MB (default: 256)
-  max_size_mb: 256
-  # Cache cleanup interval in seconds (default: 300)
-  cleanup_interval: 300
-  # Enable stale-while-revalidate (default: true)
-  stale_revalidate: true
-  # Stale TTL in seconds (default: 86400)
-  stale_ttl: 86400
-  # Cache compression level (0-9, default: 6)
-  compression_level: 6
-
-logging:
-  # Log level (debug, info, warn, error) (default: info)
-  level: "info"
-  # Log format (json, text) (default: json)
-  format: "json"
-  # Log output (stdout, file) (default: stdout)
-  output: "stdout"
-  # Log file path (required if output is "file")
-  file_path: "/var/log/reader.log"
-  # Enable request logging (default: true)
-  request_logging: true
-  # Enable stack traces (default: true)
-  stack_traces: true
-  # Fields to mask in logs (optional)
-  mask_fields:
-    - "authorization"
-    - "cookie"
-
-metrics:
-  # Enable Prometheus metrics (default: true)
-  enabled: true
-  # Metrics endpoint path (default: "/metrics")
-  path: "/metrics"
-  # Collection interval in seconds (default: 15)
-  collection_interval: 15
-  # Enable detailed metrics (default: true)
-  detailed: true
-  # Labels to include (optional)
-  labels:
-    environment: "production"
-    region: "us-east-1"
-  # Histogram buckets for latency metrics (optional)
-  latency_buckets: [0.1, 0.25, 0.5, 1, 2.5, 5, 10]
-
-screenshots:
-  # Screenshot output directory (default: "screenshots")
-  output_dir: "screenshots"
-  # Image quality (1-100, default: 90)
-  quality: 90
-  # Image format (png, jpeg, default: png)
-  format: "png"
-  # Enable full-page screenshots (default: true)
-  full_page: true
-  # Maximum screenshot dimension (default: 16384)
-  max_dimension: 16384
-  # Screenshot timeout in seconds (default: 30)
-  timeout: 30
-
-security:
-  # Enable rate limiting (default: true)
-  rate_limit: true
-  # Requests per minute per IP (default: 60)
-  rate_limit_rpm: 60
-  # Enable request validation (default: true)
-  request_validation: true
-  # Allowed domains (optional)
-  allowed_domains: []
-  # Blocked domains (optional)
-  blocked_domains: []
-  # Maximum URL length (default: 2048)
-  max_url_length: 2048
-
-performance:
-  # Enable parallel processing (default: true)
-  parallel_processing: true
-  # Maximum parallel requests (default: 10)
-  max_parallel_requests: 10
-  # Enable response compression (default: true)
-  response_compression: true
-  # Compression level (1-9, default: 6)
-  compression_level: 6
-  # Enable response caching (default: true)
-  response_caching: true
-  # Cache size in MB (default: 128)
-  response_cache_size: 128
-
+# AI configuration
 ai:
-  # Enable AI features (default: false)
-  enabled: false
-  # AI API endpoint (default: "https://api.openai.com/v1")
-  api_endpoint: "https://api.openai.com/v1"
-  # AI API key (required if enabled)
-  api_key: ""
-  # AI model to use (default: "gpt-3.5-turbo")
+  # Enable/disable AI features
+  enabled: true
+
+  # AI API endpoint
+  api_endpoint: "https://api.example.com/v1/chat/completions"
+
+  # API key for authentication
+  api_key: "your-api-key-here"
+
+  # Model to use for summarization
   model: "gpt-3.5-turbo"
-  # System prompt for summarization (default: "Please summarize the following text:")
-  prompt: "Please provide a concise summary of the following text, highlighting the key points:"
+
+  # Custom prompt for summarization
+  prompt: |
+    As a summarization assistant, analyze the text and create a clear, concise summary.
+    Focus on:
+    (1) main ideas and key points
+    (2) factual accuracy
+    (3) important context
+    (4) removing redundancy
+    (5) using clear language.
+    Keep it brief and accessible while maintaining technical accuracy when present.
+
+# Cache configuration
+cache:
+  # Maximum age of cached items in seconds
+  max_age: 3600
+
+  # Maximum number of items to keep in cache
+  max_items: 1000
+
+# Metrics configuration
+metrics:
+  # Enable/disable Prometheus metrics
+  enabled: true
+
+  # Path for metrics endpoint
+  path: "/metrics"

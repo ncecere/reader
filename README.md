@@ -1,89 +1,49 @@
-# Reader Service
+# Reader
 
-A high-performance web page content extraction service with support for text extraction, markdown conversion, and screenshot capture.
+A high-performance web content reader service that extracts text content from web pages and provides AI-powered summaries.
 
 ## Features
 
-- High-performance content extraction with caching
-- Multiple output formats (text, markdown, screenshots)
-- Memory-optimized browser pool management
-- Sub-millisecond cache response times
-- Full-page and viewport screenshots
-- Parallel request processing
-- Advanced metrics and monitoring
-- Docker support with multi-stage builds
-- Hot reload development environment
-
-## Performance
-
-### Text Extraction
-- First Request: ~586ms
-- Cached Request: ~39µs (99.997% improvement)
-- Average Processing: ~613ms
-
-### Screenshots
-- Full-page: ~1.1s
-- Viewport: ~2.0s
-- Consistent quality and size (~1.5MB)
-
-### Resource Usage
-- Total Memory: 27MB
-- Heap Usage: 5.72MB
-- Active Goroutines: 37
-- Efficient GC cycles
-
-## Requirements
-
-- Go 1.21 or higher
-- Chrome/Chromium (for local development)
-- Docker (for containerized deployment)
-- Make
+- **Text Extraction**: Clean, readable text from any web page
+- **Markdown Conversion**: Convert web content to well-formatted markdown
+- **AI Summaries**: Generate concise summaries using AI
+- **Format Options**: Choose between plain text or markdown output
+- **Performance Optimized**: Browser pool for parallel processing
+- **Caching**: Efficient content caching for faster responses
+- **Metrics**: Built-in performance monitoring
 
 ## Installation
 
-### Using Pre-built Binary
-
-Download and install the latest version:
+### From Source
 
 ```bash
-# Linux (amd64)
-curl -L https://github.com/ncecere/reader/releases/latest/download/reader-linux-amd64.tar.gz | tar xz
-sudo mv reader /usr/local/bin/
-
-# macOS (amd64)
-curl -L https://github.com/ncecere/reader/releases/latest/download/reader-darwin-amd64.tar.gz | tar xz
-sudo mv reader /usr/local/bin/
-
-# macOS (arm64/M1)
-curl -L https://github.com/ncecere/reader/releases/latest/download/reader-darwin-arm64.tar.gz | tar xz
-sudo mv reader /usr/local/bin/
-
-# Windows (using PowerShell)
-Invoke-WebRequest -Uri https://github.com/ncecere/reader/releases/latest/download/reader-windows-amd64.zip -OutFile reader.zip
-Expand-Archive reader.zip -DestinationPath .
+git clone https://github.com/ncecere/reader.git
+cd reader
+go build -o reader cmd/reader/main.go
 ```
 
 ### Using Docker
 
-Pull and run the latest version:
+Pull the image from GitHub Container Registry:
 
 ```bash
-# Pull the image
+# Pull the latest version
 docker pull ghcr.io/ncecere/reader:latest
 
-# Run with basic configuration
-docker run -p 4444:4444 ghcr.io/ncecere/reader:latest
+# Or pull a specific version
+docker pull ghcr.io/ncecere/reader:v1.5.0
+```
 
-# Run with custom configuration
-docker run -p 4444:4444 \
-  -v $(pwd)/config.yml:/home/appuser/config.yml \
-  -v $(pwd)/screenshots:/home/appuser/screenshots \
-  ghcr.io/ncecere/reader:latest
+Run with Docker:
+
+```bash
+docker run -p 4444:4444 -v $(pwd)/config.yml:/app/config.yml ghcr.io/ncecere/reader:latest
 ```
 
 ### Using Docker Compose
 
-1. Create a docker-compose.yml file (or use the provided one):
+Create a `docker-compose.yml`:
+
 ```yaml
 version: '3.8'
 services:
@@ -92,266 +52,209 @@ services:
     ports:
       - "4444:4444"
     volumes:
-      - ./screenshots:/home/appuser/screenshots
-      - chrome-cache:/tmp/chrome
-    environment:
-      - GOMAXPROCS=4
-      - GOGC=100
-      - GOMEMLIMIT=128MiB
+      - ./config.yml:/app/config.yml
     restart: unless-stopped
-
-volumes:
-  chrome-cache:
 ```
 
-2. Start the service:
+Then run:
+
 ```bash
 docker-compose up -d
 ```
 
-3. Optional: Start with monitoring (Prometheus + Grafana):
-```bash
-docker-compose up -d reader prometheus grafana
-```
-
-### Local Development
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/reader.git
-cd reader
-```
-
-2. Install dependencies:
-```bash
-make mod-tidy
-```
-
-3. Run development server with hot reload:
-```bash
-make dev
-```
-
-### Docker Development
-
-Run the development environment with hot reload:
-```bash
-docker-compose up dev
-```
-
-### Production Deployment
-
-Build and run the production container:
-```bash
-docker-compose up reader
-```
-
-## API Endpoints
-
-### Get Text Content
-```http
-GET /{url}
-X-Respond-With: text
-
-Response:
-Plain text content of the webpage
-Time: ~586ms (first request), ~39µs (cached)
-```
-
-### Get Markdown Content
-```http
-GET /{url}
-X-Respond-With: markdown
-
-Response:
-Markdown formatted content with:
-- Title
-- Visit timestamp
-- Converted content with links preserved
-Time: ~600ms (first request), ~40µs (cached)
-```
-
-### Capture Screenshot
-```http
-GET /{url}
-X-Respond-With: screenshot (viewport)
-X-Respond-With: pageshot (full-page)
-
-Response:
-PNG image of the webpage
-Time: ~2.0s (viewport), ~1.1s (full-page)
-Size: ~1.5MB
-```
-
-### Health Check
-```http
-GET /health
-```
-
-### Metrics
-```http
-GET /metrics
-
-Response:
-Prometheus metrics including:
-- Request latencies
-- Cache hit rates
-- Memory usage
-- Pool utilization
-- Content sizes
-```
-
 ## Configuration
 
-Configuration can be handled through:
-1. Environment variables
-2. config.yml file
-3. Command line flags
+The application is configured through a YAML file. By default, it looks for `config.yml` in the current directory, but you can specify a different path using the `--config` flag.
 
-### Configuration File
+### Configuration Options
 
-The service uses a YAML configuration file (config.yml). A full example with all options is available in `config.example.yml`.
-
-#### Server Configuration
 ```yaml
+# Server configuration
 server:
-  port: 4444                # Port to listen on
-  host: "0.0.0.0"          # Host to bind to
-  read_timeout: 30         # Read timeout in seconds
-  write_timeout: 30        # Write timeout in seconds
-  idle_timeout: 60         # Idle timeout in seconds
-  max_body_size: 10        # Maximum request body size in MB
-  cors_enabled: false      # Enable CORS
-  cors_origins: ["*"]      # CORS allowed origins
-  compression: true        # Enable compression
-```
+  port: 4444           # Port to run the server on
+  pool_size: 3         # Number of browser instances in the pool
 
-#### Browser Configuration
-```yaml
+# Browser configuration
 browser:
-  pool_size: 3             # Number of Chrome instances
-  chrome_path: ""          # Optional Chrome executable path
-  timeout: 30              # Request timeout in seconds
-  max_memory_mb: 128       # Maximum memory per instance
-  retries: 3               # Number of retries for failed requests
-  retry_delay: 1           # Delay between retries
-  prewarming: true        # Enable instance pre-warming
-  window_width: 1920      # Screenshot window width
-  window_height: 1080     # Screenshot window height
-```
+  chrome_path: ""      # Optional: Path to Chrome/Chromium executable
+  timeout: 30          # Request timeout in seconds
+  max_memory: 128      # Maximum memory per browser instance in MB
+  user_agent: ""       # Optional: Custom user agent string
 
-#### Cache Configuration
-```yaml
+# AI configuration
+ai:
+  enabled: true                    # Enable/disable AI features
+  api_endpoint: "..."             # AI API endpoint
+  api_key: "your-api-key"        # API key for authentication
+  model: "gpt-3.5-turbo"         # Model to use for summarization
+  prompt: "..."                   # Custom prompt for summarization
+
+# Cache configuration
 cache:
-  enabled: true           # Enable caching
-  ttl: 3600              # Cache TTL in seconds
-  max_size_mb: 256       # Maximum cache size
-  cleanup_interval: 300   # Cache cleanup interval
-  stale_revalidate: true # Enable stale-while-revalidate
-  compression_level: 6    # Cache compression level (0-9)
+  max_age: 3600       # Maximum age of cached items in seconds
+  max_items: 1000     # Maximum number of items to keep in cache
+
+# Metrics configuration
+metrics:
+  enabled: true       # Enable/disable Prometheus metrics
+  path: "/metrics"    # Path for metrics endpoint
 ```
 
-#### Performance Configuration
-```yaml
-performance:
-  parallel_processing: true     # Enable parallel processing
-  max_parallel_requests: 10     # Maximum parallel requests
-  response_compression: true    # Enable response compression
-  compression_level: 6         # Compression level (1-9)
-  response_caching: true       # Enable response caching
-  response_cache_size: 128     # Cache size in MB
-```
+### Configuration Details
 
-### Environment Variables
+#### Server Options
+- `port`: The port number the server will listen on
+- `pool_size`: Number of concurrent browser instances to maintain. Higher numbers allow more parallel processing but use more memory
 
-All configuration options can be set via environment variables using the format:
+#### Browser Options
+- `chrome_path`: Optional path to Chrome/Chromium executable. If empty, uses system default
+- `timeout`: Maximum time in seconds for a request to complete
+- `max_memory`: Maximum memory in MB allocated per browser instance
+- `user_agent`: Optional custom user agent string for requests
+
+#### AI Options
+- `enabled`: Enable or disable AI summarization features
+- `api_endpoint`: URL of the AI API endpoint
+- `api_key`: Authentication key for the AI service
+- `model`: AI model to use for summarization
+- `prompt`: Custom system prompt for better summarization results
+
+#### Cache Options
+- `max_age`: How long to keep items in cache (in seconds)
+- `max_items`: Maximum number of items to store in cache
+
+#### Metrics Options
+- `enabled`: Enable or disable Prometheus metrics
+- `path`: Endpoint path for accessing metrics
+
+## Usage
+
+### Start the Server
+
 ```bash
-READER_[SECTION]_[KEY]=value
+# Using default config.yml
+./reader
 
-# Examples:
-READER_SERVER_PORT=4444
-READER_BROWSER_POOL_SIZE=3
-READER_CACHE_TTL=3600
+# Using custom config file
+./reader --config /path/to/config.yml
 ```
 
-### Command Line Flags
+### Extract Text
 
-Basic configuration can also be provided via command line flags:
 ```bash
-./reader -port=4444 -pool-size=3 -log-level=info
+# Get plain text
+curl http://localhost:4444/https://example.com
+
+# Get markdown
+curl -H "X-Respond-With: markdown" http://localhost:4444/https://example.com
 ```
 
-For a complete list of configuration options and their defaults, see `config.example.yml`.
+### Generate AI Summary
+
+```bash
+# Get plain text summary
+curl http://localhost:4444/summary/https://example.com
+
+# Get markdown summary
+curl -H "X-Respond-With: markdown" http://localhost:4444/summary/https://example.com
+```
+
+## Response Formats
+
+### Text Format
+Plain text extraction of the web page content, with:
+- Clean, readable text
+- Preserved structure
+- Removed ads and clutter
+- Maintained paragraph formatting
+
+### Markdown Format
+Structured markdown version of the content, including:
+- Headers (h1-h6)
+- Lists (ordered and unordered)
+- Links with proper formatting
+- Basic text formatting (bold, italic)
+- Tables (when present)
+- Code blocks (with syntax highlighting hints)
+
+### AI Summary Format
+Concise summary focusing on:
+- Main ideas and key points
+- Factual accuracy
+- Important context
+- Clear language
+- Structured format (with markdown option)
+
+## Performance
+
+The service is optimized for performance through several mechanisms:
+
+- **Browser Pool**: Multiple browser instances handle requests in parallel
+- **Caching System**: Frequently accessed content is cached for faster retrieval
+- **Memory Management**: Optimized browser instances with controlled memory usage
+- **Efficient Processing**: Streamlined content extraction and processing
+- **Connection Pooling**: Reuse of connections for better performance
+
+## Metrics
+
+Access Prometheus metrics at `/metrics` for monitoring:
+
+- **Request Metrics**:
+  - Total requests
+  - Request durations
+  - Response sizes
+  - Error rates
+
+- **Cache Metrics**:
+  - Hit/miss rates
+  - Cache size
+  - Item age distribution
+
+- **System Metrics**:
+  - Memory usage
+  - Browser pool status
+  - Process statistics
 
 ## Development
 
-### Available Make Commands
+### Prerequisites
 
-- `make build`: Build the binary
-- `make test`: Run tests
-- `make coverage`: Generate test coverage report
-- `make lint`: Run linter
-- `make fmt`: Format code
-- `make docker-build`: Build Docker image
-- `make docker-run`: Run Docker container
-- `make dev`: Run development server with hot reload
-- `make help`: Show available commands
+- Go 1.21 or later
+- Chrome/Chromium browser
+- Make (optional, for using Makefile commands)
 
-### Project Structure
+### Build
 
-```
-.
-├── cmd/
-│   └── reader/           # Application entry point
-├── internal/
-│   ├── api/             # API handlers and middleware
-│   ├── common/          # Shared utilities and configurations
-│   └── core/            # Core business logic
-│       ├── browser/     # Browser automation
-│       ├── cache/       # Caching layer
-│       ├── metrics/     # Metrics collection
-│       └── converter/   # Content conversion
-├── dashboards/          # Grafana dashboards
-├── config.yml          # Configuration file
-├── Dockerfile         # Multi-stage Docker build
-├── docker-compose.yml # Container orchestration
-└── Makefile          # Build automation
+```bash
+make build
+# or
+go build -o reader cmd/reader/main.go
 ```
 
-## Performance Optimization
+### Test
 
-The service includes several optimizations:
+```bash
+make test
+# or
+go test ./...
+```
 
-- Efficient caching layer with sub-millisecond response
-- Memory-optimized browser pool
-- Parallel request processing
-- Resource cleanup and management
-- Browser instance pre-warming
-- Configurable timeouts and retries
-- Memory usage optimization
-- Efficient garbage collection
+### Development Server
 
-## Monitoring
-
-The service exposes detailed Prometheus metrics at `/metrics`:
-
-- Request latencies and counts
-- Cache hit rates and sizes
-- Memory usage and GC stats
-- Pool utilization
-- Content processing times
-- Error rates and types
-
-Includes a comprehensive Grafana dashboard for visualization.
+```bash
+make dev
+# or
+go run cmd/reader/main.go
+```
 
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a new Pull Request
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

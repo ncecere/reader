@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"fmt"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -72,18 +70,6 @@ func (h *ReaderHandler) HandleRequest(c *fiber.Ctx) error {
 			metrics.ContentProcessingErrors.WithLabelValues(format, "conversion_failed").Inc()
 			return c.SendString("Failed to convert to markdown")
 		}
-
-	case "screenshot", "pageshot":
-		outputPath := filepath.Join("screenshots", fmt.Sprintf("%d.png", time.Now().Unix()))
-		err = h.browser.CaptureScreenshot(c.Context(), url, outputPath, format == "pageshot")
-		if err != nil {
-			logger.Log.Error("Failed to capture screenshot",
-				zap.String("url", url),
-				zap.Error(err))
-			metrics.ContentProcessingErrors.WithLabelValues(format, "capture_failed").Inc()
-			return c.SendString("Failed to capture screenshot")
-		}
-		return c.SendFile(outputPath)
 
 	default:
 		return c.Status(400).SendString("Invalid format")

@@ -13,12 +13,11 @@ import (
 
 // Service manages browser operations through specialized components
 type Service struct {
-	pool       *Pool
-	text       *CachedTextExtractor
-	html       *HTMLExtractor
-	screenshot *ScreenshotCapture
-	parallel   *ParallelProcessor
-	metrics    *metrics.Metrics
+	pool     *Pool
+	text     *CachedTextExtractor
+	html     *HTMLExtractor
+	parallel *ParallelProcessor
+	metrics  *metrics.Metrics
 }
 
 // NewService creates a new browser service
@@ -40,11 +39,6 @@ func NewService(opts *BrowserOptions) (*Service, error) {
 		return nil, fmt.Errorf("failed to create browser pool: %w", err)
 	}
 
-	screenshotOpts := &ScreenshotOptions{
-		Quality:     90,
-		StoragePath: "screenshots",
-	}
-
 	// Create text extractor with caching
 	textExtractor := NewTextExtractor(pool)
 	cachedTextExtractor := NewCachedTextExtractor(textExtractor, &cache.Options{
@@ -53,11 +47,10 @@ func NewService(opts *BrowserOptions) (*Service, error) {
 	}, serviceMetrics)
 
 	service := &Service{
-		pool:       pool,
-		text:       cachedTextExtractor,
-		html:       NewHTMLExtractor(pool),
-		screenshot: NewScreenshotCapture(pool, screenshotOpts),
-		metrics:    serviceMetrics,
+		pool:    pool,
+		text:    cachedTextExtractor,
+		html:    NewHTMLExtractor(pool),
+		metrics: serviceMetrics,
 	}
 
 	// Initialize parallel processor with the service
@@ -77,12 +70,6 @@ func (s *Service) GetText(ctx context.Context, url string) (string, error) {
 // GetHTML retrieves the HTML content from a URL
 func (s *Service) GetHTML(ctx context.Context, url string) (string, error) {
 	return s.html.ExtractHTML(ctx, url)
-}
-
-// CaptureScreenshot takes a screenshot of a webpage
-func (s *Service) CaptureScreenshot(ctx context.Context, url string, outputPath string, fullPage bool) error {
-	s.screenshot.opts.FullPage = fullPage
-	return s.screenshot.CaptureScreenshot(ctx, url, outputPath)
 }
 
 // ProcessURLs processes multiple URLs in parallel
