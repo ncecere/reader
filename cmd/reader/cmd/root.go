@@ -51,32 +51,62 @@ func init() {
 	rootCmd.PersistentFlags().String("ai-model", "vltr-mistral-small", "AI model to use")
 
 	// Bind flags to viper
-	viper.BindPFlag("server.port", rootCmd.PersistentFlags().Lookup("port"))
-	viper.BindPFlag("browser.pool_size", rootCmd.PersistentFlags().Lookup("pool-size"))
-	viper.BindPFlag("browser.chrome_path", rootCmd.PersistentFlags().Lookup("chrome-path"))
-	viper.BindPFlag("browser.timeout", rootCmd.PersistentFlags().Lookup("browser-timeout"))
-	viper.BindPFlag("browser.max_retries", rootCmd.PersistentFlags().Lookup("max-retries"))
-	viper.BindPFlag("ai.enabled", rootCmd.PersistentFlags().Lookup("ai-enabled"))
-	viper.BindPFlag("ai.api_endpoint", rootCmd.PersistentFlags().Lookup("ai-endpoint"))
-	viper.BindPFlag("ai.api_key", rootCmd.PersistentFlags().Lookup("ai-key"))
-	viper.BindPFlag("ai.model", rootCmd.PersistentFlags().Lookup("ai-model"))
+	bindFlags()
 
 	// Environment variables
 	viper.SetEnvPrefix("READER")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	// Bind environment variables
-	viper.BindEnv("server.port", "READER_PORT")
-	viper.BindEnv("browser.pool_size", "READER_POOL_SIZE")
-	viper.BindEnv("browser.chrome_path", "READER_CHROME_PATH")
-	viper.BindEnv("browser.timeout", "READER_BROWSER_TIMEOUT")
-	viper.BindEnv("browser.max_retries", "READER_MAX_RETRIES")
-	viper.BindEnv("ai.enabled", "READER_AI_ENABLED")
-	viper.BindEnv("ai.api_endpoint", "READER_AI_ENDPOINT")
-	viper.BindEnv("ai.api_key", "READER_AI_KEY")
-	viper.BindEnv("ai.model", "READER_AI_MODEL")
+	bindEnvs()
 
 	viper.AutomaticEnv()
+}
+
+// bindFlags binds command line flags to viper configuration
+func bindFlags() {
+	flags := map[string]string{
+		"server.port":         "port",
+		"browser.pool_size":   "pool-size",
+		"browser.chrome_path": "chrome-path",
+		"browser.timeout":     "browser-timeout",
+		"browser.max_retries": "max-retries",
+		"ai.enabled":          "ai-enabled",
+		"ai.api_endpoint":     "ai-endpoint",
+		"ai.api_key":          "ai-key",
+		"ai.model":            "ai-model",
+	}
+
+	for configKey, flagName := range flags {
+		if err := viper.BindPFlag(configKey, rootCmd.PersistentFlags().Lookup(flagName)); err != nil {
+			logger.Log.Error("Failed to bind flag",
+				zap.String("flag", flagName),
+				zap.Error(err))
+		}
+	}
+}
+
+// bindEnvs binds environment variables to viper configuration
+func bindEnvs() {
+	envs := map[string]string{
+		"server.port":         "READER_PORT",
+		"browser.pool_size":   "READER_POOL_SIZE",
+		"browser.chrome_path": "READER_CHROME_PATH",
+		"browser.timeout":     "READER_BROWSER_TIMEOUT",
+		"browser.max_retries": "READER_MAX_RETRIES",
+		"ai.enabled":          "READER_AI_ENABLED",
+		"ai.api_endpoint":     "READER_AI_ENDPOINT",
+		"ai.api_key":          "READER_AI_KEY",
+		"ai.model":            "READER_AI_MODEL",
+	}
+
+	for configKey, envVar := range envs {
+		if err := viper.BindEnv(configKey, envVar); err != nil {
+			logger.Log.Error("Failed to bind environment variable",
+				zap.String("env", envVar),
+				zap.Error(err))
+		}
+	}
 }
 
 func initConfig() {
