@@ -1,0 +1,54 @@
+# Air configuration file for Reader service
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# Commands to run when a file changes
+cmd = "go build -o ./tmp/main ./cmd/reader"
+# Binary file generated
+bin = "./tmp/main"
+# Customize binary
+full_bin = "./tmp/main"
+# Watch these filename extensions
+include_ext = ["go", "yaml", "yml"]
+# Ignore these patterns
+exclude_dir = ["tmp", "vendor", "screenshots"]
+# Watch these directories
+include_dir = []
+# Exclude files
+exclude_file = []
+# It's not necessary to trigger build when a file is deleted
+exclude_regex = ["_test\\.go"]
+# Exclude unchanged files
+exclude_unchanged = true
+# Follow symlink for directories
+follow_symlink = true
+# This log file places in your tmp_dir
+log = "air.log"
+# Poll files for changes instead of using fsnotify
+poll = false
+# Poll interval (defaults to 500ms)
+delay = 1000 # ms
+# Stop running old binary when build errors occur
+stop_on_error = true
+# Send Interrupt signal before killing process
+send_interrupt = false
+# Delay after sending Interrupt signal
+kill_delay = 500 # ms
+
+[log]
+# Show log time
+time = true
+# Only show main log (silences watcher, build, runner)
+main_only = false
+
+[color]
+# Customize each part's color
+main = "magenta"
+watcher = "cyan"
+build = "yellow"
+runner = "green"
+
+[misc]
+# Delete tmp directory on exit
+clean_on_exit = true
