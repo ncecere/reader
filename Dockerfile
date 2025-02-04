@@ -64,7 +64,7 @@ VOLUME ["/tmp/chrome"]
 COPY --from=builder /app/build/reader .
 
 # Copy config file
-COPY config.yml .
+COPY config.example.yml config.yml
 
 # Expose ports
 EXPOSE 4444

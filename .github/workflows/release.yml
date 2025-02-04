@@ -1,0 +1,91 @@
+name: Release Go Binary
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          go mod download
+          go mod verify
+
+      - name: Run tests
+        run: make test
+
+      - name: Run linter
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+          make lint
+
+      - name: Build binary
+        run: make build
+        env:
+          CGO_ENABLED: 0
+          GOOS: linux
+          GOARCH: amd64
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            build/reader
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build for multiple platforms
+        run: |
+          # Build for Linux (amd64)
+          GOOS=linux GOARCH=amd64 make build
+          cd build && tar czf reader-linux-amd64.tar.gz reader && cd ..
+
+          # Build for Linux (arm64)
+          GOOS=linux GOARCH=arm64 make build
+          cd build && tar czf reader-linux-arm64.tar.gz reader && cd ..
+
+          # Build for macOS (amd64)
+          GOOS=darwin GOARCH=amd64 make build
+          cd build && tar czf reader-darwin-amd64.tar.gz reader && cd ..
+
+          # Build for macOS (arm64)
+          GOOS=darwin GOARCH=arm64 make build
+          cd build && tar czf reader-darwin-arm64.tar.gz reader && cd ..
+
+          # Build for Windows (amd64)
+          GOOS=windows GOARCH=amd64 go build -ldflags="-w -s -X main.version=${GITHUB_SHA::7} -X main.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" -tags 'netgo osusergo static_build' -o build/reader.exe cmd/reader/main.go
+          cd build && zip reader-windows-amd64.zip reader.exe && cd ..
+
+      - name: Upload platform-specific builds
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            build/reader-linux-amd64.tar.gz
+            build/reader-linux-arm64.tar.gz
+            build/reader-darwin-amd64.tar.gz
+            build/reader-darwin-arm64.tar.gz
+            build/reader-windows-amd64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

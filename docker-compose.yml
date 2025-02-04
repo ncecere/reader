@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   reader:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/ncecere/reader:latest
     ports:
       - "4444:4444"
     environment:

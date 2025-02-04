@@ -188,7 +188,7 @@ func (p *Pool) createInstance() (*Instance, error) {
 	opts = append(opts, chromedp.WindowSize(1920, 1080))
 
 	// Create context with custom allocator options
-	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+	allocCtx, _ := chromedp.NewExecAllocator(context.Background(), opts...)
 
 	// Create browser context with selective logging
 	ctx, _ := chromedp.NewContext(allocCtx,
@@ -209,17 +209,17 @@ func (p *Pool) createInstance() (*Instance, error) {
 	)
 
 	// Create base context with long timeout
-	ctx, cancel = context.WithTimeout(ctx, 5*time.Minute)
+	baseCtx, baseCancel := context.WithTimeout(ctx, 5*time.Minute)
 
 	// Start the browser
-	if err := chromedp.Run(ctx); err != nil {
-		cancel()
+	if err := chromedp.Run(baseCtx); err != nil {
+		baseCancel()
 		return nil, fmt.Errorf("failed to start browser: %w", err)
 	}
 
 	return &Instance{
-		ctx:    ctx,
-		cancel: cancel,
+		ctx:    baseCtx,
+		cancel: baseCancel,
 		inUse:  false,
 	}, nil
 }

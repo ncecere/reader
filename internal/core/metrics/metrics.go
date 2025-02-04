@@ -1,7 +1,6 @@
 package metrics
 
 import (
-	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -27,8 +26,6 @@ type Metrics struct {
 	// Pool metrics
 	poolSize        int32
 	activeInstances int32
-
-	mu sync.RWMutex
 }
 
 // New creates a new metrics collector

@@ -1,8 +1,8 @@
 module github.com/ncecere/reader-go
 
-go 1.23
+go 1.21
 
-toolchain go1.23.5
+toolchain go1.21.3
 
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.6.0
@@ -48,3 +48,5 @@ require (
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/PuerkitoBio/goquery v1.10.1 => github.com/PuerkitoBio/goquery v1.8.1
