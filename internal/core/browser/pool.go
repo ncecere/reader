@@ -33,7 +33,7 @@ type Instance struct {
 func NewPool(opts *BrowserOptions, metrics *metrics.Metrics) (*Pool, error) {
 	pool := &Pool{
 		opts:      opts,
-		instances: make([]*Instance, opts.PoolSize),
+		instances: make([]*Instance, 0, opts.PoolSize), // Initialize with zero length
 		ready:     make(chan *Instance, opts.PoolSize),
 		metrics:   metrics,
 	}
@@ -44,10 +44,15 @@ func NewPool(opts *BrowserOptions, metrics *metrics.Metrics) (*Pool, error) {
 	for i := 0; i < opts.PoolSize; i++ {
 		instance, err := pool.createInstance()
 		if err != nil {
-			pool.Close()
+			// Clean up any instances that were created
+			for _, inst := range pool.instances {
+				if inst != nil && inst.cancel != nil {
+					inst.cancel()
+				}
+			}
 			return nil, fmt.Errorf("failed to create instance %d: %w", i, err)
 		}
-		pool.instances[i] = instance
+		pool.instances = append(pool.instances, instance)
 		pool.ready <- instance
 	}
 
@@ -230,7 +235,7 @@ func (p *Pool) Close() {
 	defer p.mu.Unlock()
 
 	for _, instance := range p.instances {
-		if instance.cancel != nil {
+		if instance != nil && instance.cancel != nil {
 			instance.cancel()
 		}
 	}

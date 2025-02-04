@@ -1,40 +1,56 @@
 # Server configuration
 server:
   # Port to run the server on
+  # ENV: READER_PORT
+  # Flag: --port
   port: 4444
-  # Number of browser instances in the pool
-  pool_size: 3
 
 # Browser configuration
 browser:
-  # Optional: Path to Chrome/Chromium executable
-  # Leave empty to use system default
+  # Number of browser instances in the pool
+  # ENV: READER_POOL_SIZE
+  # Flag: --pool-size
+  pool_size: 5
+
+  # Path to Chrome/Chromium executable
+  # ENV: READER_CHROME_PATH
+  # Flag: --chrome-path
   chrome_path: ""
 
   # Request timeout in seconds
+  # ENV: READER_BROWSER_TIMEOUT
+  # Flag: --browser-timeout
   timeout: 30
 
-  # Maximum memory per browser instance in MB
-  max_memory: 128
-
-  # Custom user agent (optional)
-  user_agent: "Mozilla/5.0 (X11; Linux x86_64) Chrome/90.0.4430.212"
+  # Maximum retries for browser operations
+  # ENV: READER_MAX_RETRIES
+  # Flag: --max-retries
+  max_retries: 3
 
 # AI configuration
 ai:
   # Enable/disable AI features
+  # ENV: READER_AI_ENABLED
+  # Flag: --ai-enabled
   enabled: true
 
   # AI API endpoint
-  api_endpoint: "https://api.example.com/v1/chat/completions"
+  # ENV: READER_AI_ENDPOINT
+  # Flag: --ai-endpoint
+  api_endpoint: "https://ai.bitop.dev/v1"
 
   # API key for authentication
+  # ENV: READER_AI_KEY
+  # Flag: --ai-key
   api_key: "your-api-key-here"
 
   # Model to use for summarization
-  model: "gpt-3.5-turbo"
+  # ENV: READER_AI_MODEL
+  # Flag: --ai-model
+  model: "vltr-mistral-small"
 
   # Custom prompt for summarization
+  # ENV: READER_AI_PROMPT
   prompt: |
     As a summarization assistant, analyze the text and create a clear, concise summary.
     Focus on:
@@ -45,18 +61,36 @@ ai:
     (5) using clear language.
     Keep it brief and accessible while maintaining technical accuracy when present.
 
+# Logging configuration
+logging:
+  # Log level (debug, info, warn, error)
+  # ENV: READER_LOG_LEVEL
+  level: "info"
+
+  # Use JSON format for logs
+  # ENV: READER_LOG_JSON
+  json: true
+
+  # Include caller information in logs
+  # ENV: READER_LOG_CALLER
+  caller: true
+
 # Cache configuration
 cache:
   # Maximum age of cached items in seconds
+  # ENV: READER_CACHE_MAX_AGE
   max_age: 3600
 
   # Maximum number of items to keep in cache
+  # ENV: READER_CACHE_MAX_ITEMS
   max_items: 1000
 
 # Metrics configuration
 metrics:
   # Enable/disable Prometheus metrics
+  # ENV: READER_METRICS_ENABLED
   enabled: true
 
   # Path for metrics endpoint
+  # ENV: READER_METRICS_PATH
   path: "/metrics"

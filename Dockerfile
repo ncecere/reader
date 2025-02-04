@@ -1,10 +1,5 @@
-# Build stage
-FROM golang:1.21-alpine AS builder
+FROM golang:1.22-bullseye as builder
 
-# Install build dependencies
-RUN apk add --no-cache git make build-base
-
-# Set working directory
 WORKDIR /app
 
 # Copy go mod and sum files
@@ -16,67 +11,48 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build the application with optimizations
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
-    -ldflags="-w -s -X main.version=$(git rev-parse --short HEAD) -X main.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    -o build/reader \
-    cmd/reader/main.go
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux go build -o reader cmd/reader/main.go
 
-# Runtime stage
-FROM alpine:latest
+FROM debian:bullseye-slim
 
-# Install Chrome dependencies with optimizations
-RUN apk add --no-cache \
+# Install Chromium and dependencies
+RUN apt-get update && \
+    apt-get install -y \
     chromium \
-    chromium-chromedriver \
-    nss \
-    freetype \
-    freetype-dev \
-    harfbuzz \
+    fonts-ipafont-gothic \
+    fonts-wqy-zenhei \
+    fonts-thai-tlwg \
+    fonts-kacst \
+    fonts-symbola \
+    fonts-noto \
+    fonts-freefont-ttf \
+    curl \
     ca-certificates \
-    ttf-freefont \
-    && rm -rf /var/cache/* /tmp/* /var/tmp/*
+    dbus \
+    xvfb \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/* \
+    && which chromium || (echo "Chromium not found" && exit 1)
 
-# Set Chrome environment variables and flags for performance
-ENV CHROME_BIN=/usr/bin/chromium-browser \
-    CHROME_PATH=/usr/lib/chromium/ \
-    CHROME_FLAGS="--disable-dev-shm-usage --no-sandbox --disable-gpu --headless --disable-software-rasterizer"
+WORKDIR /app
 
-# Create non-root user
-RUN adduser -D -h /home/appuser appuser
-USER appuser
-WORKDIR /home/appuser
+# Copy the binary from builder
+COPY --from=builder /app/reader .
 
-# Create cache and data directories
-RUN mkdir -p \
-    screenshots \
-    cache \
-    /tmp/chrome \
-    && chown -R appuser:appuser \
-    screenshots \
-    cache \
-    /tmp/chrome
+# Create directory for config and ensure proper permissions
+RUN mkdir -p /app/config && \
+    mkdir -p /tmp/.X11-unix && \
+    chmod 1777 /tmp/.X11-unix && \
+    ln -s /usr/bin/chromium /usr/bin/chromium-browser
 
-# Set up tmpfs for Chrome
-VOLUME ["/tmp/chrome"]
+# Set environment variables
+ENV PATH="/app:${PATH}"
+ENV CHROME_PATH="/usr/bin/chromium"
+ENV DISPLAY=":99"
 
-# Copy binary from builder
-COPY --from=builder /app/build/reader .
-
-# Copy config file
-COPY config.example.yml config.yml
-
-# Expose ports
+# Expose port
 EXPOSE 4444
 
-# Set resource limits and runtime options
-ENV GOMAXPROCS=4 \
-    GOGC=100 \
-    GOMEMLIMIT=128MiB
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost:4444/health || exit 1
-
-# Set entrypoint with optimized flags
-ENTRYPOINT ["./reader"]
+# Start Xvfb and the application
+CMD Xvfb :99 -screen 0 1024x768x16 & ./reader run

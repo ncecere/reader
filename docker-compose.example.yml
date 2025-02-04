@@ -1,0 +1,41 @@
+services:
+  reader:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4444:4444"
+    volumes:
+      - ./config.yml:/app/config/config.yml
+    environment:
+      # Server configuration
+      - READER_PORT=4444
+      - READER_POOL_SIZE=5
+
+      # Browser configuration
+      - READER_CHROME_PATH=/usr/bin/chromium
+      - READER_BROWSER_TIMEOUT=30
+      - READER_MAX_RETRIES=3
+
+      # AI configuration
+      - READER_AI_ENABLED=true
+      - READER_AI_ENDPOINT=https://ai.bitop.dev/v1
+      - READER_AI_KEY=your-api-key-here
+      - READER_AI_MODEL=vltr-mistral-small
+
+      # Logging configuration
+      - READER_LOG_LEVEL=info
+      - READER_LOG_JSON=true
+      - READER_LOG_CALLER=true
+
+      # Timezone
+      - TZ=America/New_York
+    restart: unless-stopped
+    shm_size: '2gb'
+    privileged: true
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
