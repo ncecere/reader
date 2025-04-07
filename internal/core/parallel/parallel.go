@@ -1,4 +1,4 @@
-package browser
+package parallel
 
 import (
 	"context"
@@ -7,6 +7,11 @@ import (
 	"github.com/ncecere/reader-go/internal/common/logger"
 	"go.uber.org/zap"
 )
+
+// TextProvider defines an interface for extracting text from a URL
+type TextProvider interface {
+	GetText(ctx context.Context, url string) (string, error)
+}
 
 // Result represents the result of processing a single URL
 type Result struct {
@@ -17,18 +22,18 @@ type Result struct {
 
 // ParallelProcessor handles concurrent URL processing
 type ParallelProcessor struct {
-	service *Service
-	workers int
+	provider TextProvider
+	workers  int
 }
 
 // NewParallelProcessor creates a new parallel processor
-func NewParallelProcessor(service *Service, workers int) *ParallelProcessor {
+func NewParallelProcessor(provider TextProvider, workers int) *ParallelProcessor {
 	if workers <= 0 {
 		workers = 3 // Default to 3 workers
 	}
 	return &ParallelProcessor{
-		service: service,
-		workers: workers,
+		provider: provider,
+		workers:  workers,
 	}
 }
 
@@ -38,14 +43,13 @@ func (p *ParallelProcessor) ProcessURLs(ctx context.Context, urls []string) []Re
 	jobs := make(chan int, len(urls))
 	var wg sync.WaitGroup
 
-	// Start worker pool
 	for i := 0; i < p.workers; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			for idx := range jobs {
 				url := urls[idx]
-				content, err := p.service.GetText(ctx, url)
+				content, err := p.provider.GetText(ctx, url)
 
 				results[idx] = Result{
 					URL:     url,
@@ -66,13 +70,11 @@ func (p *ParallelProcessor) ProcessURLs(ctx context.Context, urls []string) []Re
 		}()
 	}
 
-	// Send jobs to workers
 	for i := range urls {
 		jobs <- i
 	}
 	close(jobs)
 
-	// Wait for all workers to complete
 	wg.Wait()
 
 	return results
@@ -81,7 +83,7 @@ func (p *ParallelProcessor) ProcessURLs(ctx context.Context, urls []string) []Re
 // ProcessURLsBatch processes URLs in batches to control memory usage
 func (p *ParallelProcessor) ProcessURLsBatch(ctx context.Context, urls []string, batchSize int) []Result {
 	if batchSize <= 0 {
-		batchSize = 10 // Default batch size
+		batchSize = 10
 	}
 
 	results := make([]Result, 0, len(urls))

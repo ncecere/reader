@@ -9,7 +9,7 @@ import (
 	"github.com/ncecere/reader-go/internal/api/handlers"
 	"github.com/ncecere/reader-go/internal/api/middleware"
 	"github.com/ncecere/reader-go/internal/core/ai"
-	"github.com/ncecere/reader-go/internal/core/browser"
+	"github.com/ncecere/reader-go/internal/core/service"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/valyala/fasthttp/fasthttpadaptor"
 )
@@ -26,7 +26,7 @@ type Config struct {
 }
 
 // New creates a new server instance
-func New(config *Config, browserService *browser.Service, aiService *ai.Service) *Server {
+func New(config *Config, browserService *service.Service, aiService *ai.Service) *Server {
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 	})

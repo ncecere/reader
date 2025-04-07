@@ -1,4 +1,4 @@
-package browser
+package extractors
 
 import (
 	"context"
@@ -6,16 +6,17 @@ import (
 
 	"github.com/chromedp/chromedp"
 	"github.com/ncecere/reader-go/internal/common/logger"
+	"github.com/ncecere/reader-go/internal/core/browser"
 	"go.uber.org/zap"
 )
 
 // HTMLExtractor handles HTML content extraction
 type HTMLExtractor struct {
-	pool *Pool
+	pool *browser.Pool
 }
 
 // NewHTMLExtractor creates a new HTML extractor
-func NewHTMLExtractor(pool *Pool) *HTMLExtractor {
+func NewHTMLExtractor(pool *browser.Pool) *HTMLExtractor {
 	return &HTMLExtractor{pool: pool}
 }
 
@@ -25,17 +26,14 @@ func (e *HTMLExtractor) ExtractHTML(ctx context.Context, url string) (string, er
 
 	var html string
 	err := e.pool.Execute(ctx, func(ctx context.Context) error {
-		// Navigate to page
 		if err := chromedp.Run(ctx, chromedp.Navigate(url)); err != nil {
 			return fmt.Errorf("failed to navigate: %w", err)
 		}
 
-		// Wait for page to load
 		if err := chromedp.Run(ctx, chromedp.WaitReady("body", chromedp.ByQuery)); err != nil {
 			return fmt.Errorf("failed to wait for page load: %w", err)
 		}
 
-		// Get HTML content
 		if err := chromedp.Run(ctx, chromedp.OuterHTML("html", &html)); err != nil {
 			return fmt.Errorf("failed to get HTML: %w", err)
 		}

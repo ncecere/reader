@@ -1,16 +1,17 @@
-package browser
+package browser_test
 
 import (
 	"context"
 	"testing"
 	"time"
 
+	"github.com/ncecere/reader-go/internal/core/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestServicePerformance(t *testing.T) {
-	service := setupTestService(t)
+	service := service.SetupTestService(t)
 
 	// Test URLs - using http to avoid SSL issues in tests
 	urls := []string{
@@ -103,7 +104,7 @@ func TestServicePerformance(t *testing.T) {
 }
 
 func TestServiceConcurrency(t *testing.T) {
-	service := setupTestService(t)
+	service := service.SetupTestService(t)
 	ctx := context.Background()
 
 	// Generate test URLs
@@ -127,7 +128,7 @@ func TestServiceConcurrency(t *testing.T) {
 }
 
 func BenchmarkService(b *testing.B) {
-	service := setupTestService(b)
+	service := service.SetupTestService(b)
 	ctx := context.Background()
 	url := "http://example.com"
 

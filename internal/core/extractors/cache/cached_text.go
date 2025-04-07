@@ -1,4 +1,4 @@
-package browser
+package cache
 
 import (
 	"context"
@@ -9,19 +9,20 @@ import (
 
 	"github.com/ncecere/reader-go/internal/common/logger"
 	"github.com/ncecere/reader-go/internal/core/cache"
+	"github.com/ncecere/reader-go/internal/core/extractors"
 	"github.com/ncecere/reader-go/internal/core/metrics"
 	"go.uber.org/zap"
 )
 
 // CachedTextExtractor adds caching to text extraction
 type CachedTextExtractor struct {
-	extractor *TextExtractor
+	extractor *extractors.TextExtractor
 	cache     *cache.Cache
 	metrics   *metrics.Metrics
 }
 
 // NewCachedTextExtractor creates a new cached text extractor
-func NewCachedTextExtractor(extractor *TextExtractor, opts *cache.Options, metrics *metrics.Metrics) *CachedTextExtractor {
+func NewCachedTextExtractor(extractor *extractors.TextExtractor, opts *cache.Options, metrics *metrics.Metrics) *CachedTextExtractor {
 	if opts == nil {
 		opts = &cache.Options{
 			MaxAge:   1 * time.Hour, // Cache content for 1 hour by default
@@ -38,10 +39,8 @@ func NewCachedTextExtractor(extractor *TextExtractor, opts *cache.Options, metri
 
 // ExtractText attempts to get text from cache before falling back to actual extraction
 func (e *CachedTextExtractor) ExtractText(ctx context.Context, url string) (string, error) {
-	// Generate cache key
 	key := e.generateKey(url)
 
-	// Try to get from cache first
 	if content, found := e.cache.Get(key); found {
 		logger.Log.Info("Cache hit",
 			zap.String("url", url),
@@ -50,7 +49,6 @@ func (e *CachedTextExtractor) ExtractText(ctx context.Context, url string) (stri
 		return content, nil
 	}
 
-	// Cache miss, extract text
 	logger.Log.Info("Cache miss, extracting text", zap.String("url", url))
 	e.metrics.RecordCacheAccess(false)
 	content, err := e.extractor.ExtractText(ctx, url)
@@ -58,7 +56,6 @@ func (e *CachedTextExtractor) ExtractText(ctx context.Context, url string) (stri
 		return "", fmt.Errorf("text extraction failed: %w", err)
 	}
 
-	// Cache the result
 	e.cache.Set(key, content)
 
 	logger.Log.Info("Cached extracted text",
@@ -68,7 +65,6 @@ func (e *CachedTextExtractor) ExtractText(ctx context.Context, url string) (stri
 	return content, nil
 }
 
-// generateKey creates a unique cache key for a URL
 func (e *CachedTextExtractor) generateKey(url string) string {
 	hash := sha256.Sum256([]byte(url))
 	return hex.EncodeToString(hash[:])

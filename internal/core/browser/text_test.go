@@ -1,4 +1,4 @@
-package browser
+package browser_test
 
 import (
 	"context"
@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/ncecere/reader-go/internal/core/extractors"
 )
 
 func TestTextExtractor_ExtractText(t *testing.T) {
@@ -28,7 +30,7 @@ func TestTextExtractor_ExtractText(t *testing.T) {
 
 	// Create text extractor using test pool
 	pool := setupTestPool(t)
-	extractor := NewTextExtractor(pool)
+	extractor := extractors.NewTextExtractor(pool)
 
 	// Test cases
 	tests := []struct {

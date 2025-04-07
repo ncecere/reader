@@ -37,7 +37,7 @@ func setupTestLogger(tb testing.TB) func() {
 	}
 }
 
-func setupTestPool(tb testing.TB) *Pool {
+func SetupTestPool(tb testing.TB) *Pool {
 	cleanup := setupTestLogger(tb)
 	tb.Cleanup(cleanup)
 
@@ -54,25 +54,4 @@ func setupTestPool(tb testing.TB) *Pool {
 
 	tb.Cleanup(pool.Close)
 	return pool
-}
-
-func setupTestService(tb testing.TB) *Service {
-	cleanup := setupTestLogger(tb)
-	tb.Cleanup(cleanup)
-
-	opts := &BrowserOptions{
-		PoolSize: 2,
-		Timeout:  int(testTimeout.Seconds()),
-	}
-
-	service, err := NewService(opts)
-	if err != nil {
-		tb.Fatalf("Failed to create service: %v", err)
-	}
-
-	tb.Cleanup(func() {
-		service.Close()
-	})
-
-	return service
 }

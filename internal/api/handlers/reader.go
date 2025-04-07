@@ -7,18 +7,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/ncecere/reader-go/internal/common/logger"
 	"github.com/ncecere/reader-go/internal/common/metrics"
-	"github.com/ncecere/reader-go/internal/core/browser"
 	"github.com/ncecere/reader-go/internal/core/converter"
+	"github.com/ncecere/reader-go/internal/core/service"
 	"go.uber.org/zap"
 )
 
 // ReaderHandler handles web content extraction requests
 type ReaderHandler struct {
-	browser *browser.Service
+	browser *service.Service
 }
 
 // NewReaderHandler creates a new reader handler
-func NewReaderHandler(browser *browser.Service) *ReaderHandler {
+func NewReaderHandler(browser *service.Service) *ReaderHandler {
 	return &ReaderHandler{
 		browser: browser,
 	}

@@ -9,6 +9,7 @@ import (
 	"github.com/ncecere/reader-go/internal/common/logger"
 	"github.com/ncecere/reader-go/internal/core/ai"
 	"github.com/ncecere/reader-go/internal/core/browser"
+	"github.com/ncecere/reader-go/internal/core/service"
 	"github.com/ncecere/reader-go/internal/server"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -21,7 +22,7 @@ var runCmd = &cobra.Command{
 	Long:  `Start the reader server with the specified configuration`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Create browser service
-		browserService, err := browser.NewService(&browser.BrowserOptions{
+		browserService, err := service.NewService(&browser.BrowserOptions{
 			PoolSize:   viper.GetInt("browser.pool_size"),
 			ChromePath: viper.GetString("browser.chrome_path"),
 			Timeout:    viper.GetInt("browser.timeout"),

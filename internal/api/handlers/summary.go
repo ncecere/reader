@@ -8,19 +8,19 @@ import (
 	"github.com/ncecere/reader-go/internal/common/logger"
 	"github.com/ncecere/reader-go/internal/common/metrics"
 	"github.com/ncecere/reader-go/internal/core/ai"
-	"github.com/ncecere/reader-go/internal/core/browser"
 	"github.com/ncecere/reader-go/internal/core/converter"
+	"github.com/ncecere/reader-go/internal/core/service"
 	"go.uber.org/zap"
 )
 
 // SummaryHandler handles web content summarization requests
 type SummaryHandler struct {
-	browser *browser.Service
+	browser *service.Service
 	ai      *ai.Service
 }
 
 // NewSummaryHandler creates a new summary handler
-func NewSummaryHandler(browser *browser.Service, ai *ai.Service) *SummaryHandler {
+func NewSummaryHandler(browser *service.Service, ai *ai.Service) *SummaryHandler {
 	return &SummaryHandler{
 		browser: browser,
 		ai:      ai,

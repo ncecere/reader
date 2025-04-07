@@ -1,4 +1,4 @@
-package browser
+package browser_test
 
 import (
 	"context"
@@ -7,6 +7,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/ncecere/reader-go/internal/core/browser"
+	"github.com/ncecere/reader-go/internal/core/extractors"
 )
 
 func TestHTMLExtractor_ExtractHTML(t *testing.T) {
@@ -28,8 +31,8 @@ func TestHTMLExtractor_ExtractHTML(t *testing.T) {
 	defer ts.Close()
 
 	// Create HTML extractor using test pool
-	pool := setupTestPool(t)
-	extractor := NewHTMLExtractor(pool)
+	pool := browser.SetupTestPool(t)
+	extractor := extractors.NewHTMLExtractor(pool)
 
 	// Test cases
 	tests := []struct {
